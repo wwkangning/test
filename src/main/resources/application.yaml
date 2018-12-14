@@ -1,0 +1,43 @@
+server:
+  port: 8082
+  servlet:
+    context-path: /demo
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/spring_shiro?characterEncoding=UTF-8&serverTimezone=UTC
+    username: root
+    password: root
+    type: com.alibaba.druid.pool.DruidDataSource
+    testOnBorrow: false
+    testOnReturn: false
+    testWhileIdle: true
+    validationQuery: select 1 from dual
+    validationQueryTimeout: 1
+    keepAlive: true
+    removeAbandoned: true
+    removeAbandonedTimeout: 80
+    logAbandoned: true
+    poolPreparedStatements: true
+    maxPoolPreparedStatementPerConnectionSize: 20
+    filters: stat,slf4j,wall
+    connectionProperties: oracle.net.CONNECT_TIMEOUT=2000;oracle.jdbc.ReadTimeout=10000;druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+  thymeleaf:
+    cache: false
+    check-template: true
+    check-template-location: true
+    enabled: true
+    encoding: UTF-8
+    prefix: classpath:/templates/
+    suffix: .html
+
+
+
+  http:
+    encoding:
+      charset: utf-8
+      enabled: true
