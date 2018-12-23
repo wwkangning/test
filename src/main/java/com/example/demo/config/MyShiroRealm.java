@@ -2,11 +2,19 @@ package com.example.demo.config;
 
 
 
+import com.example.demo.model.SysPermission;
+import com.example.demo.model.SysRole;
+import com.example.demo.model.User;
+import com.example.demo.service.UserService;
 import org.apache.shiro.authc.*;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
+import org.apache.shiro.util.ByteSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Resource;
 
@@ -16,15 +24,27 @@ import javax.annotation.Resource;
  * @description
  */
 public class MyShiroRealm extends AuthorizingRealm {
-    @Resource
-    public ShiroService shiroService;
+    @Autowired
+    private UserService userService;
+
+    Logger logger = LoggerFactory.getLogger(this.getClass());
 
     /**
      * 授权
      */
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
+        logger.info("权限配置");
         SimpleAuthorizationInfo authorizationInfo = new SimpleAuthorizationInfo();
+        //如果身份认证的时候没有传入User对象，这里只能取到userName
+        //也就是SimpleAuthenticationInfo构造的时候第一个参数传递需要User对象
+        User user  = (User)principals.getPrimaryPrincipal();
+        for(SysRole role : user.getRoleList()){
+            authorizationInfo.addRole(role.getRole());
+            for(SysPermission p : role.getPermissions()){
+                authorizationInfo.addStringPermission(p.getPermission());
+            }
+        }
         return authorizationInfo;
     }
 
@@ -32,21 +52,22 @@ public class MyShiroRealm extends AuthorizingRealm {
      * 登录认证
      */
     @Override
-    protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthenticationException {
-        //获取用户账号
-        UsernamePasswordToken token=(UsernamePasswordToken) authenticationToken;
-        String username = token.getUsername();
-        String password = shiroService.getPasswordByUsername(username);
-        if (password != null) {
-            AuthenticationInfo authenticationInfo = new SimpleAuthenticationInfo(
-                    //认证通过后，存放在session,一般存放user对象
-                    username,
-                    //用户数据库中的密码
-                    password,
-                    //返回Realm名
-                    getName());
-            return authenticationInfo;
+    protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
+        logger.info("用户登录认证");
+        //获取用户的输入的账号.
+        String userName = (String)token.getPrincipal();
+        //通过username从数据库中查找 User对象.
+        //实际项目中，这里可以根据实际情况做缓存，如果不做，Shiro自己也是有时间间隔机制，2分钟内不会重复执行该方法
+        User user = userService.findByUserName(userName);
+        if(user == null){
+            return null;
         }
-        return null;
+        SimpleAuthenticationInfo authenticationInfo = new SimpleAuthenticationInfo(
+                user, //这里传入的是user对象，比对的是用户名，直接传入用户名也没错，但是在授权部分就需要自己重新从数据库里取权限
+                user.getPassword(), //密码
+                ByteSource.Util.bytes(user.getCredentialsSalt()),//salt=username+salt
+                getName()  //realm name
+        );
+        return authenticationInfo;
     }
 }

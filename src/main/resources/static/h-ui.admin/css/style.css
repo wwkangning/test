@@ -1,3 +1,18 @@
 @charset "utf-8";
 /* 你自己的样式 */
+.error_msg {
+    color: #c81623;
+    display: none;
+}
 
+.fl {
+    float:left;
+}
+
+.ml30 {
+    margin-left: 30px;
+}
+
+.mt15 {
+    margin-top: 15px;
+}
