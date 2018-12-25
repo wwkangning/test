@@ -44,7 +44,7 @@
         <div class="formControls col-xs-8 col-xs-offset-3">
           <div class="fl">
             <div>
-              <input class="input-text size-L" type="text" placeholder="验证码" onblur="if(this.value==''){this.value='验证码:'}" onclick="if(this.value=='验证码:'){this.value='';}" value="验证码:" style="width:150px;">
+              <input id="verifyCode" name="verifyCode" class="input-text size-L" type="text" placeholder="验证码" onblur="if(this.value=='验证码：'){this.value='验证码：'}" onclick="if(this.value==''){this.value='';}" value="验证码：" style="width:150px;">
             </div>
             <div class="mt15">
               <label for="online">
@@ -55,18 +55,13 @@
           <div id="qrcode" class="fl ml-50"></div>
         </div>
       </div>
+
       <div class="row cl">
         <div class="formControls col-xs-8 col-xs-offset-3">
+          <div class="error_msg" id="error_msg">密码错误</div>
+        </div>
+      </div>
 
-        </div>
-      </div>
-      <div class="error_msg" id="error_msg">
-        <div class="row cl">
-          <div class="formControls col-xs-8 col-xs-offset-3">
-              密码错误
-          </div>
-        </div>
-      </div>
       <div class="row cl">
         <div class="formControls col-xs-8 col-xs-offset-3">
           <input id="login_submit" name="" type="button" class="btn btn-success radius size-L" value="&nbsp;登&nbsp;&nbsp;&nbsp;&nbsp;录&nbsp;">
@@ -84,55 +79,55 @@
 <script type="text/javascript" th:inline="none">
     $(function() {
        $.get("/demo/login/loginout?"+Math.random());
+       $("#verifyCode").parent().hide();
     });
 
     $("#login_submit").on("click", function(e) {
-        $.ajax({
-            url: "/demo/login/doLogin",
-            type: "POST",
-            data:{
-                userName : $("#userName").val(),
-                password : $("#password").val()
-            },
-            success: function (data) {
-              if(data.data) {
+        $("#error_msg").text("").hide();
+        if($("#verifyCode").parent().is(":hidden")) {
+            $.ajax({
+                url: "/demo/login/genAuthQRcode",
+                type: "POST",
+                data:{
+                    userName : $("#userName").val(),
+                    password : $("#password").val()
+                },
+                success: function (data) {
+                    var qrcode = new QRCode(document.getElementById("qrcode"), {
+                        width : 80,//设置宽高
+                        height : 80
+                    });
+                    qrcode.makeCode(data.data);
+                    $("#verifyCode").parent().show();
+                },
+                error: function () {
+
+                }
+            });
+        } else {
+            $.ajax({
+                url: "/demo/login/doLogin",
+                type: "POST",
+                data:{
+                    userName : $("#userName").val(),
+                    password : $("#password").val(),
+                    verifyCode: $("#verifyCode").val().substring("验证码：".length)
+                },
+                success: function (data) {
+                    if(data.data) {
+                        window.location.href = "/demo/page/index";
+                    } else {
+                        $("#error_msg").text(data.desc).show();
+                    }
+                },
+                error: function () {
+
+                }
+            });
+        }
 
 
 
-                  $.ajax({
-                      url: "/demo/login/genAuthQRcode",
-                      type: "POST",
-                      data:{
-                          userName : $("#userName").val(),
-                          password : $("#password").val()
-                      },
-                      success: function (data) {
-                          var qrcode = new QRCode(document.getElementById("qrcode"), {
-                              width : 80,//设置宽高
-                              height : 80
-                          });
-                          qrcode.makeCode(data.data);
-                      },
-                      error: function () {
-
-                      }
-                  });
-
-
-
-
-
-
-
-                  //window.location.href = "/demo/page/index";
-              } else {
-                  $("#error_msg").text(data.msg).show();
-              }
-            },
-            error: function () {
-
-            }
-        });
     });
 </script>
 </body>

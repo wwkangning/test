@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
@@ -30,9 +31,17 @@ public class LoginController {
     private LoginService loginService;
 
     @RequestMapping("/doLogin")
-    public ResultEntity<Boolean> doLogin(String userName, String password) {
+    public ResultEntity<Boolean> doLogin(String userName, String password, String verifyCode) {
         logger.info("登陆用户名：{}", userName);
         ResultEntity<Boolean> result = loginService.login(userName, password);
+        if(!StringUtils.isEmpty(verifyCode)) {
+            boolean rs = loginService.verifyAuth(Long.parseLong(verifyCode));
+            if(!rs) {
+                logger.error("验证OPT验证码，验证失败");
+                result = new ResultEntity<>(false);
+                result.setError(ReturnCodeEnum.LOGIN_VERIFY_CODE_ERROR);
+            }
+        }
         logger.info("登陆结果：{}", result);
         return result;
     }
