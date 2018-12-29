@@ -75,15 +75,36 @@
 <div class="footer">Copyright 你的公司名称 by H-ui.admin v3.1</div>
 <script type="text/javascript" th:src="@{/lib/jquery/1.9.1/jquery.min.js}"></script>
 <script type="text/javascript" th:src="@{/h-ui/js/H-ui.min.js}"></script>
+<script type="text/javascript" th:src="@{/lib/layer/2.4/layer.js}"></script>
 <script type="text/javascript" th:src="@{/lib/qrcode.js}"></script>
-<script type="text/javascript" th:inline="none">
+<script type="text/javascript" th:inline="javascript">
     $(function() {
-       $.get("/demo/login/loginout?"+Math.random());
-       $("#verifyCode").parent().hide();
+        $.get("/demo/login/loginout?"+Math.random());
+        $("#verifyCode").parent().hide();
+        //点击enter键触犯登陆操作
+        document.onkeydown = function (e) {
+            if (!e) e = window.event;
+            if ((e.keyCode || e.which) == 13) {
+                var obtnLogin = document.getElementById("login_submit");   //submit_btn为按钮ID
+                obtnLogin.focus();
+                login();//提交按钮触发的方法
+            }
+        }
     });
 
+    /**
+     * 单击登陆按钮
+     */
     $("#login_submit").on("click", function(e) {
+      login();
+    });
+
+    /**
+     * 登陆
+     */
+    function login() {
         $("#error_msg").text("").hide();
+        //验证码框不存在，现查询该用户是否绑定OTP，未绑定显示二维码进行绑定
         if($("#verifyCode").parent().is(":hidden")) {
             $.ajax({
                 url: "/demo/login/genAuthQRcode",
@@ -92,27 +113,37 @@
                     userName : $("#userName").val(),
                     password : $("#password").val()
                 },
+                dataType:"json",
                 success: function (data) {
-                    var qrcode = new QRCode(document.getElementById("qrcode"), {
-                        width : 80,//设置宽高
-                        height : 80
-                    });
-                    qrcode.makeCode(data.data);
-                    $("#verifyCode").parent().show();
+                    if(data.code == "0000" && data.data != null) {
+                        var qrcode = new QRCode(document.getElementById("qrcode"), {
+                            width : 80,//设置宽高
+                            height : 80
+                        });
+                        qrcode.makeCode(data.data);
+                        $("#verifyCode").parent().show();
+                    } else if(data.code != "0000") {
+                        $("#error_msg").text(data.desc).show();
+                    } else {
+                        $("#verifyCode").parent().show();
+                    }
                 },
                 error: function () {
-
+                    layer.alert('网络异常，请稍后再试');
                 }
             });
         } else {
+            //登陆验证
+            var verifyCode = getVerifyCode();
             $.ajax({
                 url: "/demo/login/doLogin",
                 type: "POST",
                 data:{
                     userName : $("#userName").val(),
                     password : $("#password").val(),
-                    verifyCode: $("#verifyCode").val().substring("验证码：".length)
+                    verifyCode: verifyCode
                 },
+                dataType:"json",
                 success: function (data) {
                     if(data.data) {
                         window.location.href = "/demo/page/index";
@@ -121,14 +152,29 @@
                     }
                 },
                 error: function () {
-
+                    layer.alert('网络异常，请稍后再试');
                 }
             });
         }
+    }
 
-
-
-    });
+    /**
+     * 获取OTP验证码
+     * @returns {*|jQuery}
+     */
+    function getVerifyCode() {
+        var verifyCode = $("#verifyCode").val();
+        if(verifyCode.indexOf("验证码：") != -1) {
+            verifyCode = verifyCode.substring("验证码：".length);
+        } else if(verifyCode.indexOf("验证码") != -1) {
+            verifyCode = verifyCode.substring("验证码".length);
+        } else if(verifyCode.indexOf("验证") != -1) {
+            verifyCode = verifyCode.substring("验证".length);
+        } else if(verifyCode.indexOf("验") != -1) {
+            verifyCode = verifyCode.substring("验".length);
+        }
+        return verifyCode;
+    }
 </script>
 </body>
 </html>

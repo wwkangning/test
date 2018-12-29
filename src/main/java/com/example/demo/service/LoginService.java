@@ -3,7 +3,7 @@ package com.example.demo.service;
 import com.example.demo.auth.GoogleAuthenticator;
 import com.example.demo.constants.ReturnCodeEnum;
 import com.example.demo.entity.ResultEntity;
-import com.example.demo.model.User;
+import com.example.demo.model.SysUser;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.IncorrectCredentialsException;
@@ -64,18 +64,28 @@ public class LoginService {
      */
     public void logout() {
         Subject subject = SecurityUtils.getSubject();
-        User user = (User)subject.getPrincipal();
+        SysUser user = (SysUser)subject.getPrincipal();
         if(user != null) {
             logger.info("用户：{}，退出登录", user.getName());
         }
         subject.logout();
     }
 
+    /**
+     * 获取OTP绑定二维码
+     * @param name
+     * @return
+     */
     public String genAuthqrcode(String name) {
         String qrBarcode = GoogleAuthenticator.getQRBarcode(name, AUTH_CODE_SECRET);
         return qrBarcode;
     }
 
+    /**
+     * OTP验证码验证
+     * @param code
+     * @return
+     */
     public boolean verifyAuth(long code) {
         long t = System.currentTimeMillis();
         GoogleAuthenticator ga = new GoogleAuthenticator();

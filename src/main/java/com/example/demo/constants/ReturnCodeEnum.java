@@ -3,11 +3,14 @@ package com.example.demo.constants;
 public enum ReturnCodeEnum {
 
     SUCCESS("0000", "成功"),
+    SYS_ERROR("9999", "系统异常"),
     LOGIN_USER_NAME_EMPTY("0001", "用户名为空"),
     LOGIN_USER_NOT_EXIST("0002", "账号不存在"),
     LOGIN_USER_PWD_ERROR("0003", "密码不正确"),
     LOGIN_USER_VALIDATE_FAIL("0004", "用户验证失败"),
     LOGIN_VERIFY_CODE_ERROR("0005", "验证码错误"),
+    LOGIN_VERIFY_CODE_EMPTY("0006", "验证码为空"),
+    PARAM_ERROR("0007", "参数错误：%s"),
 
     ;
 

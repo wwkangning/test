@@ -10,6 +10,9 @@ public class ResultEntity<T> {
 
     private T data;
 
+    public ResultEntity() {
+    }
+
     public ResultEntity(T data) {
         this.data = data;
     }

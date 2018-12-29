@@ -978,7 +978,7 @@ a:hover,.active a{color:#06c}
 
 
 /*3.1.17 缩略语
-	Example:		<abbr title="User Interface" class="initialism">UI</abbr>
+	Example:		<abbr title="SysUser Interface" class="initialism">UI</abbr>
 	Explain:
 */
 abbr[title],abbr[data-original-title]{cursor:help;border-bottom:1px dotted #999}

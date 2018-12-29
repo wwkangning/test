@@ -11,7 +11,7 @@ public class SysRole {
 
     private List<SysPermission> permissions;
 
-    private List<User> users;// 一个角色对应多个用户
+    private List<SysUser> sysUsers;// 一个角色对应多个用户
 
     public Integer getRoleId() {
         return roleId;
@@ -53,11 +53,11 @@ public class SysRole {
         this.permissions = permissions;
     }
 
-    public List<User> getUsers() {
-        return users;
+    public List<SysUser> getSysUsers() {
+        return sysUsers;
     }
 
-    public void setUsers(List<User> users) {
-        this.users = users;
+    public void setSysUsers(List<SysUser> sysUsers) {
+        this.sysUsers = sysUsers;
     }
 }
