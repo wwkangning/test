@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.SysPermissionMapper">
+  <resultMap id="BaseResultMap" type="com.example.demo.model.SysPermission">
+    <result column="PERMISSION_ID" jdbcType="INTEGER" property="permissionId" />
+    <result column="PERMISSION_NAME" jdbcType="VARCHAR" property="permissionName" />
+    <result column="RESOURCE_TYPE" jdbcType="VARCHAR" property="resourceType" />
+    <result column="URL" jdbcType="VARCHAR" property="url" />
+    <result column="PERMISSION" jdbcType="VARCHAR" property="permission" />
+    <result column="PARENT_ID" jdbcType="INTEGER" property="parentId" />
+    <result column="PRRENT_IDS" jdbcType="VARCHAR" property="prrentIds" />
+    <result column="AVAILABLE" jdbcType="INTEGER" property="available" />
+  </resultMap>
+  <insert id="insert" parameterType="com.example.demo.model.SysPermission">
+    insert into sys_permission (PERMISSION_ID, PERMISSION_NAME, RESOURCE_TYPE, 
+      URL, PERMISSION, PARENT_ID, 
+      PRRENT_IDS, AVAILABLE)
+    values (#{permissionId,jdbcType=INTEGER}, #{permissionName,jdbcType=VARCHAR}, #{resourceType,jdbcType=VARCHAR}, 
+      #{url,jdbcType=VARCHAR}, #{permission,jdbcType=VARCHAR}, #{parentId,jdbcType=INTEGER}, 
+      #{prrentIds,jdbcType=VARCHAR}, #{available,jdbcType=INTEGER})
+  </insert>
+  <insert id="insertSelective" parameterType="com.example.demo.model.SysPermission">
+    insert into sys_permission
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="permissionId != null">
+        PERMISSION_ID,
+      </if>
+      <if test="permissionName != null">
+        PERMISSION_NAME,
+      </if>
+      <if test="resourceType != null">
+        RESOURCE_TYPE,
+      </if>
+      <if test="url != null">
+        URL,
+      </if>
+      <if test="permission != null">
+        PERMISSION,
+      </if>
+      <if test="parentId != null">
+        PARENT_ID,
+      </if>
+      <if test="prrentIds != null">
+        PRRENT_IDS,
+      </if>
+      <if test="available != null">
+        AVAILABLE,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="permissionId != null">
+        #{permissionId,jdbcType=INTEGER},
+      </if>
+      <if test="permissionName != null">
+        #{permissionName,jdbcType=VARCHAR},
+      </if>
+      <if test="resourceType != null">
+        #{resourceType,jdbcType=VARCHAR},
+      </if>
+      <if test="url != null">
+        #{url,jdbcType=VARCHAR},
+      </if>
+      <if test="permission != null">
+        #{permission,jdbcType=VARCHAR},
+      </if>
+      <if test="parentId != null">
+        #{parentId,jdbcType=INTEGER},
+      </if>
+      <if test="prrentIds != null">
+        #{prrentIds,jdbcType=VARCHAR},
+      </if>
+      <if test="available != null">
+        #{available,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+</mapper>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.SysRoleMapper">
+  <resultMap id="BaseResultMap" type="com.example.demo.model.SysRole">
+    <result column="ROLE_ID" jdbcType="INTEGER" property="roleId" />
+    <result column="ROLE" jdbcType="VARCHAR" property="role" />
+    <result column="DESCRIPTION" jdbcType="VARCHAR" property="description" />
+    <result column="AVAILABLE" jdbcType="INTEGER" property="available" />
+  </resultMap>
+  <insert id="insert" parameterType="com.example.demo.model.SysRole">
+    insert into sys_role (ROLE_ID, ROLE, DESCRIPTION, 
+      AVAILABLE)
+    values (#{roleId,jdbcType=INTEGER}, #{role,jdbcType=VARCHAR}, #{description,jdbcType=VARCHAR}, 
+      #{available,jdbcType=INTEGER})
+  </insert>
+  <insert id="insertSelective" parameterType="com.example.demo.model.SysRole">
+    insert into sys_role
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="roleId != null">
+        ROLE_ID,
+      </if>
+      <if test="role != null">
+        ROLE,
+      </if>
+      <if test="description != null">
+        DESCRIPTION,
+      </if>
+      <if test="available != null">
+        AVAILABLE,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="roleId != null">
+        #{roleId,jdbcType=INTEGER},
+      </if>
+      <if test="role != null">
+        #{role,jdbcType=VARCHAR},
+      </if>
+      <if test="description != null">
+        #{description,jdbcType=VARCHAR},
+      </if>
+      <if test="available != null">
+        #{available,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+</mapper>
