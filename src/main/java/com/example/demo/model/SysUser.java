@@ -1,5 +1,6 @@
 package com.example.demo.model;
 
+import java.util.Date;
 import java.util.List;
 
 public class SysUser {
@@ -12,6 +13,8 @@ public class SysUser {
     private Integer state;//用户状态,0:创建未认证（比如没有激活，没有输入验证码等等）--等待验证的用户 , 1:正常状态,2：用户被锁定.
     private String email;
     private Integer otp;//OTP绑定状态，0-未绑定；1-绑定
+    private String phoneNo;//手机号
+    private Date createTime;//创建时间
 
     private List<SysRole> roleList;// 一个用户具有多个角色
 
@@ -86,6 +89,22 @@ public class SysUser {
 
     public void setOtp(Integer otp) {
         this.otp = otp;
+    }
+
+    public String getPhoneNo() {
+        return phoneNo;
+    }
+
+    public void setPhoneNo(String phoneNo) {
+        this.phoneNo = phoneNo;
+    }
+
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
     }
 
     /**

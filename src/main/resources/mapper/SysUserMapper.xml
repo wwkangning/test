@@ -10,15 +10,17 @@
     <result column="STATE" jdbcType="INTEGER" property="state" />
     <result column="EMAIL" jdbcType="VARCHAR" property="email" />
     <result column="OTP" jdbcType="INTEGER" property="otp" />
+    <result column="PHONE_NO" jdbcType="VARCHAR" property="phoneNo" />
+    <result column="CREATE_TIME" jdbcType="DATE" property="createTime" />
 
   </resultMap>
   <insert id="insert" parameterType="com.example.demo.model.SysUser">
     insert into sys_user (USER_ID, USER_NAME, NAME, 
       PASSWORD, SALT, STATE, 
-      EMAIL)
+      EMAIL, OTP, PHONE_NO, CREATE_TIME)
     values (#{userId,jdbcType=INTEGER}, #{userName,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, 
       #{password,jdbcType=VARCHAR}, #{salt,jdbcType=VARCHAR}, #{state,jdbcType=INTEGER}, 
-      #{email,jdbcType=VARCHAR})
+      #{email,jdbcType=VARCHAR}, #{otp,jdbcType=VARCHAR}, #{phoneNo,jdbcType=VARCHAR},#{createTime,jdbcType=DATE})
   </insert>
   <insert id="insertSelective" parameterType="com.example.demo.model.SysUser">
     insert into sys_user
@@ -44,6 +46,15 @@
       <if test="email != null">
         EMAIL,
       </if>
+      <if test="otp != null">
+        OTP,
+      </if>
+      <if test="phoneNo != null">
+        PHONE_NO,
+      </if>
+      <if test="createTime != null">
+        CREATE_TIME,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="userId != null">
@@ -67,6 +78,15 @@
       <if test="email != null">
         #{email,jdbcType=VARCHAR},
       </if>
+      <if test="otp != null">
+        #{otp,jdbcType=VARCHAR},
+      </if>
+      <if test="phoneNo != null">
+        #{phoneNo,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=DATE},
+      </if>
     </trim>
   </insert>
   <update id="updateByUserNameSelective" parameterType="com.example.demo.model.SysUser">
@@ -79,9 +99,31 @@
     where USER_NAME =  #{userName,jdbcType=VARCHAR}
   </update>
   <select id="selectByParams" resultMap="BaseResultMap" parameterType="com.example.demo.model.SysUser">
-    select USER_ID, USER_NAME, NAME, PASSWORD, SALT, STATE, EMAIL, OTP
+    select USER_ID, USER_NAME, NAME, PASSWORD, SALT, STATE, EMAIL, OTP, PHONE_NO, CREATE_TIME
     from sys_user
     where USER_NAME =  #{userName,jdbcType=VARCHAR}
+  </select>
+
+  <select id="querySysUserList" resultType="com.example.demo.entity.SysUserQueryEntity" parameterType="com.example.demo.entity.SysUserQueryEntity">
+    select u.USER_ID as userId, u.NAME, u.PHONE_NO as phoneNo, u.USER_NAME as userName,
+           u.EMAIL, DATE_FORMAT(u.CREATE_TIME, '%Y-%m-%d %H:%i:%s') as createTime,
+           r.DESCRIPTION as roleName,
+           u.state
+    from sys_user u
+      left join sys_user_role ur
+        on u.USER_ID=ur.USER_ID
+      left join sys_role r
+        on ur.ROLE_ID=r.ROLE_ID
+    where 1=1
+    <if test="startTime != null and startTime != ''">
+      and <![CDATA[ u.CREATE_TIME >= STR_TO_DATE(#{startTime, jdbcType=VARCHAR}, '%Y-%m-%d') ]]>
+    </if>
+    <if test="endTime != null and endTime != ''">
+      and <![CDATA[ u.CREATE_TIME <= STR_TO_DATE(#{endTime, jdbcType=VARCHAR}, '%Y-%m-%d') ]]>
+    </if>
+    <if test="userName != null and userName != ''">
+      and u.USER_NAME like CONCAT('%', #{userName, jdbcType=VARCHAR}, '%')
+    </if>
   </select>
 
 </mapper>

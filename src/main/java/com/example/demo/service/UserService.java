@@ -1,10 +1,13 @@
 package com.example.demo.service;
 
 import com.example.demo.constants.Constants;
+import com.example.demo.entity.SysUserQueryEntity;
 import com.example.demo.mapper.SysUserMapper;
 import com.example.demo.model.SysUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 
 @Service
@@ -34,6 +37,10 @@ public class UserService {
         record.setUserName(userName);
         record.setOtp(Constants.OTP_BINDED);
         sysUserMapper.updateByUserNameSelective(record);
+    }
+
+    public List<SysUserQueryEntity> listByParams(SysUserQueryEntity query) {
+        return sysUserMapper.querySysUserList(query);
     }
 
 }
