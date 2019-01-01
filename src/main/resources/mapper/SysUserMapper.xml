@@ -11,7 +11,8 @@
     <result column="EMAIL" jdbcType="VARCHAR" property="email" />
     <result column="OTP" jdbcType="INTEGER" property="otp" />
     <result column="PHONE_NO" jdbcType="VARCHAR" property="phoneNo" />
-    <result column="CREATE_TIME" jdbcType="DATE" property="createTime" />
+    <result column="CREATE_TIME" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="SECRET_KEY" jdbcType="VARCHAR" property="secretKey" />
 
   </resultMap>
   <insert id="insert" parameterType="com.example.demo.model.SysUser">
@@ -20,9 +21,9 @@
       EMAIL, OTP, PHONE_NO, CREATE_TIME)
     values (#{userId,jdbcType=INTEGER}, #{userName,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, 
       #{password,jdbcType=VARCHAR}, #{salt,jdbcType=VARCHAR}, #{state,jdbcType=INTEGER}, 
-      #{email,jdbcType=VARCHAR}, #{otp,jdbcType=VARCHAR}, #{phoneNo,jdbcType=VARCHAR},#{createTime,jdbcType=DATE})
+      #{email,jdbcType=VARCHAR}, #{otp,jdbcType=VARCHAR}, #{phoneNo,jdbcType=VARCHAR},#{createTime,jdbcType=TIMESTAMP})
   </insert>
-  <insert id="insertSelective" parameterType="com.example.demo.model.SysUser">
+  <insert id="insertSelective" parameterType="com.example.demo.model.SysUser" useGeneratedKeys="true" keyProperty="userId">
     insert into sys_user
     <trim prefix="(" suffix=")" suffixOverrides=",">
       <if test="userId != null">
@@ -85,7 +86,7 @@
         #{phoneNo,jdbcType=VARCHAR},
       </if>
       <if test="createTime != null">
-        #{createTime,jdbcType=DATE},
+        #{createTime,jdbcType=TIMESTAMP},
       </if>
     </trim>
   </insert>
@@ -95,15 +96,23 @@
       <if test="otp != null">
         OTP = #{otp,jdbcType=INTEGER},
       </if>
+      <if test="secretKey != null">
+        SECRET_KEY = #{secretKey,jdbcType=VARCHAR},
+      </if>
     </set>
     where USER_NAME =  #{userName,jdbcType=VARCHAR}
   </update>
   <select id="selectByParams" resultMap="BaseResultMap" parameterType="com.example.demo.model.SysUser">
-    select USER_ID, USER_NAME, NAME, PASSWORD, SALT, STATE, EMAIL, OTP, PHONE_NO, CREATE_TIME
+    select USER_ID, USER_NAME, NAME, PASSWORD, SALT, STATE, EMAIL, OTP, PHONE_NO, CREATE_TIME, SECRET_KEY
     from sys_user
-    where USER_NAME =  #{userName,jdbcType=VARCHAR}
+    where 1=1
+    <if test="userName != null">
+    and USER_NAME =  #{userName,jdbcType=VARCHAR}
+    </if>
+    <if test="userId != null">
+      and USER_ID =  #{userId,jdbcType=INTEGER}
+    </if>
   </select>
-
   <select id="querySysUserList" resultType="com.example.demo.entity.SysUserQueryEntity" parameterType="com.example.demo.entity.SysUserQueryEntity">
     select u.USER_ID as userId, u.NAME, u.PHONE_NO as phoneNo, u.USER_NAME as userName,
            u.EMAIL, DATE_FORMAT(u.CREATE_TIME, '%Y-%m-%d %H:%i:%s') as createTime,
@@ -124,6 +133,44 @@
     <if test="userName != null and userName != ''">
       and u.USER_NAME like CONCAT('%', #{userName, jdbcType=VARCHAR}, '%')
     </if>
+    order by u.CREATE_TIME desc
   </select>
+
+  <select id="selectByUserId" resultType="com.example.demo.entity.SysUserEntity" parameterType="java.lang.Integer">
+    select U.USER_ID as userId, U.USER_NAME as userName, U.NAME, U.PASSWORD, U.SALT, U.STATE, U.EMAIL, U.OTP, U.PHONE_NO as phoneNo, U.CREATE_TIME as createTime, U.SECRET_KEY as secretKey, UR.ROLE_ID as roleId
+    from sys_user U left join sys_user_role UR on U.USER_ID=UR.USER_ID
+    where U.USER_ID =  #{userId,jdbcType=INTEGER}
+  </select>
+
+  <update id="updateSelective" parameterType="com.example.demo.model.SysUser">
+    update sys_user
+    <set>
+      <if test="userName != null">
+        USER_NAME = #{userName,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        NAME = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="password != null">
+        PASSWORD = #{password,jdbcType=VARCHAR},
+      </if>
+      <if test="salt != null">
+        SALT = #{salt,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null">
+        STATE = #{state,jdbcType=INTEGER},
+      </if>
+      <if test="email != null">
+        EMAIL = #{email,jdbcType=VARCHAR},
+      </if>
+      <if test="otp != null">
+        OTP = #{otp,jdbcType=VARCHAR},
+      </if>
+      <if test="phoneNo != null">
+        PHONE_NO = #{phoneNo,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where USER_ID =  #{userId,jdbcType=VARCHAR}
+  </update>
 
 </mapper>

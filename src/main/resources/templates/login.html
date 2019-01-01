@@ -87,7 +87,6 @@
             if ((e.keyCode || e.which) == 13) {
                 var obtnLogin = document.getElementById("login_submit");   //submit_btn为按钮ID
                 obtnLogin.focus();
-                login();//提交按钮触发的方法
             }
         }
     });
@@ -96,7 +95,7 @@
      * 单击登陆按钮
      */
     $("#login_submit").on("click", function(e) {
-      login();
+        login();
     });
 
     /**

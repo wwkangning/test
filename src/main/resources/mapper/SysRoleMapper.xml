@@ -44,4 +44,12 @@
       </if>
     </trim>
   </insert>
+  <select id="selectByParams" resultMap="BaseResultMap" parameterType="com.example.demo.model.SysRole">
+    select ROLE_ID, ROLE, DESCRIPTION, AVAILABLE
+    from sys_role
+    where 1=1
+    <if test="available != null and available != ''">
+      and AVAILABLE = #{available,jdbcType=INTEGER}
+    </if>
+  </select>
 </mapper>

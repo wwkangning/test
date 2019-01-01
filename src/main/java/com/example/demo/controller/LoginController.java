@@ -48,20 +48,23 @@ public class LoginController {
     @RequestMapping("/doLogin")
     public ResultEntity<Boolean> doLogin(@Valid LoginEntity loginUser) {
         logger.info("登陆用户名：{}", loginUser.getUserName());
-        ResultEntity<Boolean> result = loginService.login(loginUser.getUserName(), loginUser.getPassword());
-        if(!StringUtils.isEmpty(loginUser.getVerifyCode())) {
-            boolean rs = loginService.verifyAuth(Long.parseLong(loginUser.getVerifyCode()));
-            if(!rs) {
-                logger.error("验证OTP验证码，验证失败");
-                result = new ResultEntity<>(false);
-                result.setError(ReturnCodeEnum.LOGIN_VERIFY_CODE_ERROR);
+        ResultEntity<Boolean> result = new ResultEntity<>(true);
+        ResultEntity<SysUser> loginResult = loginService.login(loginUser.getUserName(), loginUser.getPassword());
+        if(ReturnCodeEnum.SUCCESS.getCode().equals(loginResult.getCode())) {
+            if(!StringUtils.isEmpty(loginUser.getVerifyCode())) {
+                boolean rs = loginService.verifyAuth(Long.parseLong(loginUser.getVerifyCode()), loginResult.getData().getSecretKey());
+                if(!rs) {
+                    logger.error("验证OTP验证码，验证失败");
+                    result = new ResultEntity<>(false);
+                    result.setError(ReturnCodeEnum.LOGIN_VERIFY_CODE_ERROR);
+                } else {
+                    userService.bindOtp(loginUser.getUserName());
+                }
             } else {
-                userService.bindOtp(loginUser.getUserName());
+                logger.error("OTP验证码为空");
+                result = new ResultEntity<>(false);
+                result.setError(ReturnCodeEnum.LOGIN_VERIFY_CODE_EMPTY);
             }
-        } else {
-            logger.error("OTP验证码为空");
-            result = new ResultEntity<>(false);
-            result.setError(ReturnCodeEnum.LOGIN_VERIFY_CODE_EMPTY);
         }
         logger.info("登陆结果：{}", result);
         return result;
@@ -87,10 +90,11 @@ public class LoginController {
     @RequestMapping("/genAuthQRcode")
     public ResultEntity<String> genAuthQRcode(String userName, String password) {
         ResultEntity<String> result = new ResultEntity<>(null);
-        ResultEntity<Boolean> rs = loginService.login(userName, password);
-        SysUser user = (SysUser)SecurityUtils.getSubject().getPrincipal();
-        if(rs.getData() && user.getOtp() == Constants.OTP_UNBIND) {
-            String qrcode = loginService.genAuthqrcode(userName);
+        ResultEntity<SysUser> rs = loginService.login(userName, password);
+        SysUser user = rs.getData();
+        if(rs.getData() != null && user.getOtp() == Constants.OTP_UNBIND) {
+            String qrcode = loginService.genAuthqrcode(user);
+            userService.genOtpSecretKey(user.getUserName(), user.getSecretKey());
             result.setData(qrcode);
         } else {
             result.setCode(rs.getCode());

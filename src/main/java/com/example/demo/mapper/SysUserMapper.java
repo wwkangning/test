@@ -1,5 +1,6 @@
 package com.example.demo.mapper;
 
+import com.example.demo.entity.SysUserEntity;
 import com.example.demo.entity.SysUserQueryEntity;
 import com.example.demo.model.SysUser;
 
@@ -15,4 +16,8 @@ public interface SysUserMapper {
     int updateByUserNameSelective(SysUser record);
 
     List<SysUserQueryEntity> querySysUserList(SysUserQueryEntity query);
+
+    SysUserEntity selectByUserId(Integer userId);
+
+    int updateSelective(SysUser record);
 }

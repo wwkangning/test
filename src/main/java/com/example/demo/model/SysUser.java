@@ -15,6 +15,7 @@ public class SysUser {
     private Integer otp;//OTP绑定状态，0-未绑定；1-绑定
     private String phoneNo;//手机号
     private Date createTime;//创建时间
+    private String secretKey;//OTP动态验证码KEY
 
     private List<SysRole> roleList;// 一个用户具有多个角色
 
@@ -105,6 +106,14 @@ public class SysUser {
 
     public void setCreateTime(Date createTime) {
         this.createTime = createTime;
+    }
+
+    public String getSecretKey() {
+        return secretKey;
+    }
+
+    public void setSecretKey(String secretKey) {
+        this.secretKey = secretKey;
     }
 
     /**

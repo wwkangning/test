@@ -6,4 +6,6 @@ public interface SysUserRoleMapper {
     int insert(SysUserRole record);
 
     int insertSelective(SysUserRole record);
+
+    int deleteByUserId(Integer userId);
 }

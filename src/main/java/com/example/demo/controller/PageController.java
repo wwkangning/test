@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.service.LoginService;
+import com.example.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,6 +18,9 @@ public class PageController {
 
     @Autowired
     private LoginService loginService;
+
+    @Autowired
+    private UserService userService;
 
     @RequestMapping("/{page}")
     public String load(@PathVariable String page) {

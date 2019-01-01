@@ -28,8 +28,8 @@ public class LoginService {
      * @param password
      * @return
      */
-    public ResultEntity<Boolean> login(String userName, String password) {
-        ResultEntity<Boolean> loginResult = new ResultEntity(false);
+    public ResultEntity<SysUser> login(String userName, String password) {
+        ResultEntity<SysUser> loginResult = new ResultEntity();
         if(userName==null || userName.isEmpty()) {
             loginResult.setError(ReturnCodeEnum.LOGIN_USER_NAME_EMPTY);
             return loginResult;
@@ -43,8 +43,9 @@ public class LoginService {
         try {
             currentUser.login(token);// 传到MyAuthorizingRealm类中的方法进行认证
             Session session = currentUser.getSession();
+            SysUser sysUser = (SysUser) currentUser.getPrincipal();
             session.setAttribute("userName", userName);
-            loginResult.setData(true);
+            loginResult.setData(sysUser);
             return loginResult;
         } catch (UnknownAccountException e) {
             logger.error("用户登录异失败，账号不存在");
@@ -73,11 +74,13 @@ public class LoginService {
 
     /**
      * 获取OTP绑定二维码
-     * @param name
+     * @param sysUser
      * @return
      */
-    public String genAuthqrcode(String name) {
-        String qrBarcode = GoogleAuthenticator.getQRBarcode(name, AUTH_CODE_SECRET);
+    public String genAuthqrcode(SysUser sysUser) {
+        String secret =  GoogleAuthenticator.generateSecretKey();
+        sysUser.setSecretKey(secret);
+        String qrBarcode = GoogleAuthenticator.getQRBarcode(sysUser.getUserName(), secret);
         return qrBarcode;
     }
 
@@ -86,11 +89,11 @@ public class LoginService {
      * @param code
      * @return
      */
-    public boolean verifyAuth(long code) {
+    public boolean verifyAuth(long code, String secretKey) {
         long t = System.currentTimeMillis();
         GoogleAuthenticator ga = new GoogleAuthenticator();
         ga.setWindowSize(1);
-        boolean r = ga.check_code(AUTH_CODE_SECRET, code, t);
+        boolean r = ga.check_code(secretKey, code, t);
         return r;
     }
 

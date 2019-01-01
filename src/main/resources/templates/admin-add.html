@@ -26,10 +26,17 @@
 <body>
 <article class="page-container">
 	<form class="form form-horizontal" id="form-admin-add">
+	<input type="hidden" name="userId" id="userId" th:value="${sysUser?.userId}">
 	<div class="row cl">
-		<label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>管理员：</label>
+		<label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>登录用户名：</label>
 		<div class="formControls col-xs-8 col-sm-9">
-			<input type="text" class="input-text" value="" placeholder="" id="adminName" name="adminName">
+			<input type="text" class="input-text" value="" placeholder="" id="userName" name="userName" th:value="${sysUser?.userName}">
+		</div>
+	</div>
+	<div class="row cl">
+		<label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>名称：</label>
+		<div class="formControls col-xs-8 col-sm-9">
+			<input type="text" class="input-text" value="" placeholder="" id="name" name="name" th:value="${sysUser?.name}">
 		</div>
 	</div>
 	<div class="row cl">
@@ -44,7 +51,7 @@
 			<input type="password" class="input-text" autocomplete="off"  placeholder="确认新密码" id="password2" name="password2">
 		</div>
 	</div>
-	<div class="row cl">
+	<!--<div class="row cl">
 		<label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>性别：</label>
 		<div class="formControls col-xs-8 col-sm-9 skin-minimal">
 			<div class="radio-box">
@@ -56,37 +63,36 @@
 				<label for="sex-2">女</label>
 			</div>
 		</div>
-	</div>
+	</div>-->
 	<div class="row cl">
 		<label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>手机：</label>
 		<div class="formControls col-xs-8 col-sm-9">
-			<input type="text" class="input-text" value="" placeholder="" id="phone" name="phone">
+			<input type="text" class="input-text" value="" placeholder="" id="phoneNo" name="phoneNo" th:value="${sysUser?.phoneNo}">
 		</div>
 	</div>
 	<div class="row cl">
 		<label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>邮箱：</label>
 		<div class="formControls col-xs-8 col-sm-9">
-			<input type="text" class="input-text" placeholder="@" name="email" id="email">
+			<input type="text" class="input-text" placeholder="@" name="email" id="email" th:value="${sysUser?.email}">
 		</div>
 	</div>
 	<div class="row cl">
 		<label class="form-label col-xs-4 col-sm-3">角色：</label>
 		<div class="formControls col-xs-8 col-sm-9"> <span class="select-box" style="width:150px;">
-			<select class="select" name="adminRole" size="1">
-				<option value="0">超级管理员</option>
-				<option value="1">总编</option>
-				<option value="2">栏目主辑</option>
-				<option value="3">栏目编辑</option>
+			<select class="select" name="roleId" size="1" id="sysRole" th:if="${sysUser != null}" th:field="${sysUser.roleId}" th:switch="${sysUser.roleId}">
+				<option  th:each="role:${sysRoles}" th:value="${role.code}" th:text="${role.msg}"></option>
+			</select>
+			<select class="select" name="roleId" size="1" id="sysRole" th:if="${sysUser == null}">
 			</select>
 			</span> </div>
 	</div>
-	<div class="row cl">
+	<!--<div class="row cl">
 		<label class="form-label col-xs-4 col-sm-3">备注：</label>
 		<div class="formControls col-xs-8 col-sm-9">
 			<textarea name="" cols="" rows="" class="textarea"  placeholder="说点什么...100个字符以内" dragonfly="true" onKeyUp="$.Huitextarealength(this,100)"></textarea>
 			<p class="textarea-numberbar"><em class="textarea-length">0</em>/100</p>
 		</div>
-	</div>
+	</div>-->
 	<div class="row cl">
 		<div class="col-xs-8 col-sm-9 col-xs-offset-4 col-sm-offset-3">
 			<input class="btn btn-primary radius" type="submit" value="&nbsp;&nbsp;提交&nbsp;&nbsp;">
@@ -112,10 +118,18 @@ $(function(){
 		radioClass: 'iradio-blue',
 		increaseArea: '20%'
 	});
-	
+
+	if($("#sysRole option").length == 0) {
+        $.get("/demo/sysUser/roleSelector", function(data) {
+            $.each(data.data,function(index,item){
+                $('#sysRole').append(new Option(item.msg,item.code));//往下拉菜单里添加元素
+            })
+        }, "json");
+	}
+
 	$("#form-admin-add").validate({
 		rules:{
-			adminName:{
+			userName:{
 				required:true,
 				minlength:4,
 				maxlength:16
@@ -127,8 +141,10 @@ $(function(){
 				required:true,
 				equalTo: "#password"
 			},
-			sex:{
-				required:true,
+			name:{
+                required:true,
+                minlength:2,
+                maxlength:16
 			},
 			phone:{
 				required:true,
@@ -138,7 +154,7 @@ $(function(){
 				required:true,
 				email:true,
 			},
-			adminRole:{
+			role:{
 				required:true,
 			},
 		},
@@ -146,19 +162,39 @@ $(function(){
 		focusCleanup:true,
 		success:"valid",
 		submitHandler:function(form){
-			$(form).ajaxSubmit({
-				type: 'post',
-				url: "xxxxxxx" ,
-				success: function(data){
-					layer.msg('添加成功!',{icon:1,time:1000});
-				},
-                error: function(XmlHttpRequest, textStatus, errorThrown){
-					layer.msg('error!',{icon:1,time:1000});
-				}
-			});
-			var index = parent.layer.getFrameIndex(window.name);
-			parent.$('.btn-refresh').click();
-			parent.layer.close(index);
+            var index = parent.layer.getFrameIndex(window.name);
+            alert($("#userId").val());
+            if($("#userId").val() != '') {
+                $(form).ajaxSubmit({
+                    type: 'post',
+                    url: "/demo/sysUser/updateSysUser",
+                    success: function(data){
+                        layer.msg('修改成功!',{icon:1,time:1000});
+                        parent.$('.btn-refresh').click();
+                        parent.layer.close(index);
+                    },
+                    error: function(XmlHttpRequest, textStatus, errorThrown){
+                        layer.msg('error!',{icon:1,time:1000});
+                        parent.$('.btn-refresh').click();
+                        parent.layer.close(index);
+                    }
+                });
+			} else {
+                $(form).ajaxSubmit({
+                    type: 'post',
+                    url: "/demo/sysUser/addSysUser",
+                    success: function(data){
+                        layer.msg('添加成功!',{icon:1,time:1000});
+                        parent.$('.btn-refresh').click();
+                        parent.layer.close(index);
+                    },
+                    error: function(XmlHttpRequest, textStatus, errorThrown){
+                        layer.msg('error!',{icon:1,time:1000});
+                        parent.$('.btn-refresh').click();
+                        parent.layer.close(index);
+                    }
+                });
+			}
 		}
 	});
 });
